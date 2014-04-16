@@ -15,6 +15,7 @@ int rainbow[6][3] = {
 
 char streams[16];
 char streamColors[16];
+boolean directions[16];
 
 void setup(){
 	for(char i = 0; i < 16; i++)
@@ -51,6 +52,7 @@ void addStream(){
 		char target = results[random(index)];
 		streams[target] = 0;
 		streamColors[target] = random(6);
+		directions[target] = random(2) == 0;
 	}
 }
 
@@ -68,18 +70,21 @@ void draw(){
 
 	for(byte row = 0; row < 8; row++){
 		for(byte col = 0; col < 8; col++){
+			char realRow = row;
+			if(directions[col])
+				realRow = (realRow - 7) * -1;
 			if(streams[col] == row){
-				multipliers[row][col] = 1;
-				result[row][col] = RGBtoLong(rainbow[streamColors[col]][0], rainbow[streamColors[col]][1], rainbow[streamColors[col]][2]);
+				multipliers[realRow][col] = 1;
+				result[realRow][col] = RGBtoLong(rainbow[streamColors[col]][0], rainbow[streamColors[col]][1], rainbow[streamColors[col]][2]);
 			}else if(streams[col] > row){
 				char sub = streams[col] - row - 1;
 				if(sub <= tail){
 					float multiplier = getMultiplier(sub);
-					multipliers[row][col] = multiplier;
+					multipliers[realRow][col] = multiplier;
 					unsigned long color = RGBtoLong(rainbow[streamColors[col]][0] * multiplier,
 					                                rainbow[streamColors[col]][1] * multiplier,
 					                                rainbow[streamColors[col]][2] * multiplier);
-					result[row][col] = color;
+					result[realRow][col] = color;
 				}
 			}
 		}
@@ -87,23 +92,26 @@ void draw(){
 
 	for(byte row = 0; row < 8; row++){
 		for(char col = 8; col < 16; col++){
-			char realCol = col - 8;
+			char realRow = col - 8;
+			char realCol = row;
+			if(directions[col])
+				realCol = (realCol - 7) * -1;
 			if(streams[col] == row)
-				result[realCol][row] = RGBtoLong(rainbow[streamColors[col]][0], rainbow[streamColors[col]][1], rainbow[streamColors[col]][2]);
+				result[realRow][realCol] = RGBtoLong(rainbow[streamColors[col]][0], rainbow[streamColors[col]][1], rainbow[streamColors[col]][2]);
 			else if(streams[col] > row){
 				char sub = streams[col] - row - 1;
 				if(sub <= tail){
 					float multiplier = getMultiplier(sub);
-					if(result[realCol][row] == 0){
+					if(result[realRow][realCol] == 0){
 						unsigned long color = RGBtoLong(rainbow[streamColors[col]][0] * multiplier,
 						                                rainbow[streamColors[col]][1] * multiplier,
 						                                rainbow[streamColors[col]][2] * multiplier);
-						result[realCol][row] = color;
+						result[realRow][realCol] = color;
 					}else{
-						if(multipliers[realCol][row] > multiplier)
-							multiplier = multipliers[realCol][row];
+						if(multipliers[realRow][realCol] > multiplier)
+							multiplier = multipliers[realRow][realCol];
 						char shade = 0xFF * multiplier;
-						result[realCol][row] = RGBtoLong(shade, shade, shade);
+						result[realRow][realCol] = RGBtoLong(shade, shade, shade);
 					}
 				}
 			}
