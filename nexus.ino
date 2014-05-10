@@ -96,9 +96,12 @@ void draw(){
 			char realCol = row;
 			if(directions[col])
 				realCol = (realCol - 7) * -1;
-			if(streams[col] == row)
-				result[realRow][realCol] = RGBtoLong(rainbow[streamColors[col]][0], rainbow[streamColors[col]][1], rainbow[streamColors[col]][2]);
-			else if(streams[col] > row){
+			if(streams[col] == row){
+				if(result[realRow][realCol] == 0)
+					result[realRow][realCol] = RGBtoLong(rainbow[streamColors[col]][0], rainbow[streamColors[col]][1], rainbow[streamColors[col]][2]);
+				else
+					result[realRow][realCol] = RGBtoLong(255, 255, 255);
+			}else if(streams[col] > row){
 				char sub = streams[col] - row - 1;
 				if(sub <= tail){
 					float multiplier = getMultiplier(sub);
